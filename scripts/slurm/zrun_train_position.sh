@@ -32,6 +32,12 @@ conda activate "${CONDA_ENV:-sparrta}"
 # SETUP - Do not modify below this line
 #=============================================================================
 
+# Point the code at the data. Override these (or export them in your shell /
+# sbatch --export) to match where you keep the SpaRRTa data and caches.
+export SPARRTA_DATA_ROOT="${SPARRTA_DATA_ROOT:-/shared/results/common/kargin/unreal_engine/dataset/position_between_objects}"
+export SPARRTA_LEGO_ROOT="${SPARRTA_LEGO_ROOT:-/shared/results/common/kargin/unreal_engine/dataset/position_between_objects/real_world_images}"
+export SPARRTA_CACHE_DIR="${SPARRTA_CACHE_DIR:-./cache}"
+
 # Export configuration as environment variables
 export PERSPECTIVE
 export ENVIRONMENT
