@@ -8,6 +8,10 @@ Unlike conventional 3D probing tasks that target metric quantities (depth, pose)
 measures a more fundamental capability: recognizing the *relative direction* (Front / Back /
 Left / Right) of a target object with respect to a reference object, from a given viewpoint.
 
+<p align="center">
+  <img src="assets/teaser.png" alt="SpaRRTa teaser" width="100%">
+</p>
+
 > Turhan Can Kargın, Wojciech Jasiński, Adam Pardyl, Bartosz Zieliński, Marcin Przewięźlikowski.
 > *SpaRRTa: A Synthetic Benchmark for Evaluating Spatial Intelligence in Visual Foundation Models.*
 > [arXiv:2601.11729](https://arxiv.org/abs/2601.11729)
@@ -25,6 +29,12 @@ SpaRRTa is a 4-way classification problem (**Front / Back / Left / Right**) with
 The benchmark is rendered in Unreal Engine 5 across five environments (Forest, Desert,
 Winter Town, Bridge, City), and is complemented by a small **real-world** set photographed with
 lego figures for sim-to-real evaluation.
+
+The overall data-generation and probing pipeline is summarized below:
+
+<p align="center">
+  <img src="assets/pipeline.png" alt="SpaRRTa data-generation and probing pipeline" width="100%">
+</p>
 
 ## Probing strategies
 
