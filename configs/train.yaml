@@ -1,0 +1,56 @@
+system:
+  random_seed: 8 # 8, 42
+  num_gpus: 1
+  port: 12367
+note: ""
+batch_size: 256
+train_subset_size: 0 # null/0 => full train set; positive int => random train subset size
+train_subset_stratified: false # when true and train_subset_size>0, sample near-balanced labels for train subset
+# camera: 50, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1800, 2000, 3000
+# human: 50, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 5000
+wandb:
+  use: False
+  eval_images: False
+defaults:
+  - optimizer: custom_epoch
+  - backbone: clip_b16_laion
+  - dataset: unreal_position
+  - probe: classifier
+  - _self_
+experiment_name: SSL_Position_Between_Objects
+experiment_model: clip_b16_laion
+environment: forest # forest, desert, winter_town
+protocol: default
+holdout_environment: ""
+init_type: default
+fewshot_k: 0
+is_eval: False
+ckpt_path: ""
+output_dir: "result"
+result_csv_suffix: ""
+feature_cache_dir: ${oc.env:SPARRTA_CACHE_DIR,./cache}
+save_head: false
+visualization:
+  sample_number: 40
+  correctly_classified: true
+  enable_perspective_divergence: true
+  angle_bin_size_deg: 20
+  min_samples_per_angle_bin: 20
+  class_focus: all # options: all, lateral (left/right), sagittal (front/back)
+backbone:
+  return_cls: false
+  mean_pool: true
+  efficient_probe: false
+probe:
+  num_classes: 4
+dataset:
+  exclude_ambiguous: true
+  split: train
+sweep:
+  enable: False
+  max_trials: 6
+  learning_rates: [0.001]
+  weight_decays: [0.01, 0.001, 0.0001]
+  patience: 3
+  eval_every_epochs: 1
+  final_fit: true

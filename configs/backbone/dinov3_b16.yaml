@@ -1,0 +1,11 @@
+_target_: sparrta.models.dino.DINO
+repo_dir: ${oc.env:DINOV3_REPO,""}
+weights: ${oc.env:DINOV3_WEIGHTS,""}
+dino_name: dinov3
+model_name: vitb16
+output: dense
+layer: -1
+add_norm: true
+return_cls: false
+mean_pool: false
+efficient_probe: false

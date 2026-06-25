@@ -1,0 +1,14 @@
+_target_: sparrta.datasets.lego_position.LegoRelativePosition
+root: ${oc.env:SPARRTA_LEGO_ROOT,./data/lego_images}
+split: train
+image_size: 224
+image_mean: imagenet
+split_mode: random # random, time_series, clip_block_random, clip_block_time_series
+train_ratio: 0.8
+valid_ratio: 0.1
+test_ratio: 0.1
+clip_block_size: 20
+clip_id_source: filename_numeric # filename_numeric, parent_folder
+perspective: lego_human
+recursive: true
+name: lego_position

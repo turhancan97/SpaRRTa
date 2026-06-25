@@ -1,0 +1,9 @@
+_target_: sparrta.models.deit.DeIT
+model_size: base
+img_size: 224
+output: dense
+layer: -1
+add_norm: true
+mean_pool: false
+return_cls: false
+efficient_probe: false

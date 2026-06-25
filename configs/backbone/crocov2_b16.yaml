@@ -1,0 +1,10 @@
+_target_: sparrta.models.crocov2.CROCOV2
+repo_dir: ${oc.env:CROCO_REPO,""}
+size_image: 224
+output: dense
+model_name: vitb16
+layer: -1
+add_norm: true
+return_cls: false
+mean_pool: false
+efficient_probe: false

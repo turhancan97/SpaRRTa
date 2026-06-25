@@ -1,0 +1,9 @@
+_target_: sparrta.models.dino.DINO
+dino_name: dino
+model_name: vitb16
+output: dense
+layer: -1
+add_norm: true
+return_cls: false
+mean_pool: false
+efficient_probe: false

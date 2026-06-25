@@ -1,0 +1,8 @@
+_target_: sparrta.models.vggt.VGGT1B
+repo_dir: ${oc.env:VGGT_REPO,""}
+output: dense
+layer: -1
+add_norm: true
+return_cls: false
+mean_pool: false
+efficient_probe: false
