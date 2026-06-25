@@ -92,7 +92,16 @@ pip install -U openmim && mim install mmcv mmcls "mmselfsup>=1.0.0rc0"
 
 The datasets are **not** bundled with the code. Download them from Hugging Face:
 
-➡️ **https://huggingface.co/datasets/turhancan97/SpaRRTa**
+- 🧩 **Synthetic (Unreal):** https://huggingface.co/datasets/turhancan97/SpaRRTa
+- 🧱 **Real-world (lego):** https://huggingface.co/datasets/turhancan97/SpaRRTa-Lego
+
+The lego set ships in Hugging Face ImageFolder layout, so downloading it reproduces the
+`train/{front,back,left,right}/*.jpg` structure expected below:
+
+```bash
+huggingface-cli download turhancan97/SpaRRTa-Lego --repo-type dataset --local-dir ./hf_SpaRRTa-Lego
+export SPARRTA_LEGO_ROOT=$(pwd)/hf_SpaRRTa-Lego/train
+```
 
 Then point the code at the data via environment variables:
 
