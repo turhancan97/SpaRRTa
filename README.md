@@ -71,6 +71,199 @@ Backbones marked 🔧 are loaded lazily: they only error (with a clear message) 
 select them without setting the corresponding environment variable. For the local DINOv3 you
 can avoid all of this by using `backbone=dinov3_timm` instead.
 
+> Want to probe a model that isn't listed? See [**Adding your own model**](#adding-your-own-model).
+
+## Adding your own model
+
+SpaRRTa probes a **frozen** backbone, so adding a new model means writing a thin wrapper that
+exposes its features in the format the probe heads expect — no training-loop changes required.
+Once your wrapper reports its feature dimension, **all three probe heads
+(`ClassificationHead` / `ABMILPHead` / `EfficientProbing`) work automatically.**
+
+Adding a model is two steps: **(1)** a wrapper module under `sparrta/models/`, and
+**(2)** a Hydra config under `configs/backbone/`.
+
+### 1. The interface contract
+
+Your backbone is a `torch.nn.Module` that is instantiated by Hydra (`instantiate(cfg.backbone)`)
+and then frozen (`requires_grad_(False)`). It must provide:
+
+**Attributes** (set in `__init__`):
+
+| Attribute | Type | Purpose |
+|-----------|------|---------|
+| `self.feat_dim` | `int` (or `list[int]` for multilayer) | Per-token channel dim `C`. The probe head is built with this. |
+| `self.patch_size` | `int` | Patch size in pixels (used for padding and attention-map plotting). |
+| `self.checkpoint_name` | `str` | Short id used to name the feature cache. Make it unique per weights. |
+| `self.layer` | `str` | Which block(s) were read; used in the cache path. |
+| `self.output` | `str` | One of `cls` / `gap` / `dense` / `dense-cls`; used in the cache path. |
+
+**`forward(images)`** receives a `[B, 3, H, W]` batch and must honor the three pooling flags
+that are passed in from the config:
+
+| Flag (config) | Expected return | Shape |
+|---------------|-----------------|-------|
+| `efficient_probe=True` | token sequence, **CLS first then patches** | `[B, 1 + N, C]` |
+| `return_cls=True`, `mean_pool=False` | CLS token | `[B, C]` |
+| `mean_pool=True`, `return_cls=False` | mean over patch tokens | `[B, C]` |
+| `mean_pool=True`, `return_cls=True` | mean over all tokens | `[B, C]` |
+
+> The feature extractor flattens any output with >2 dims to `[B, -1]` before caching; the
+> attention heads reshape it back to `[B, 1+N, C]` using `feat_dim`. This is why `feat_dim`
+> must be the **per-token** channel dim `C` (not `(1+N)·C`).
+
+The easiest way to get this exactly right is to copy an existing wrapper —
+[`sparrta/models/dinov3_timm.py`](sparrta/models/dinov3_timm.py) (timm) or
+[`sparrta/models/mae.py`](sparrta/models/mae.py) (Hugging Face) — and swap in your model.
+
+### 2. A minimal, self-contained wrapper (timm)
+
+This needs no external repo — `timm` is already a dependency. Save as
+`sparrta/models/mymodel.py`:
+
+```python
+import torch
+import torch.nn as nn
+from .utils import center_padding, tokens_to_output
+
+
+class MyModel(nn.Module):
+    def __init__(
+        self,
+        model_name: str = "vit_base_patch16_224.augreg2_in21k_ft_in1k",
+        output: str = "dense",
+        layer: int = -1,
+        return_cls: bool = False,
+        mean_pool: bool = False,
+        efficient_probe: bool = False,
+        pretrained: bool = True,
+    ):
+        super().__init__()
+        import timm
+
+        self.output = output
+        self.return_cls = return_cls
+        self.mean_pool = mean_pool
+        self.efficient_probe = efficient_probe
+
+        self.vit = timm.create_model(model_name, pretrained=pretrained).eval().to(torch.float32)
+
+        # --- required metadata ---
+        ps = self.vit.patch_embed.patch_size
+        self.patch_size = int(ps[0] if isinstance(ps, (tuple, list)) else ps)
+        self.feat_dim = int(getattr(self.vit, "num_features", self.vit.embed_dim))  # per-token C
+        self.checkpoint_name = f"mymodel_{model_name}"
+
+        num_layers = len(self.vit.blocks)
+        chosen = (num_layers - 1) if layer == -1 else int(layer)
+        self.multilayers = [chosen]
+        self.layer = str(chosen)
+
+    def forward(self, images):
+        images = center_padding(images, self.patch_size)
+        h, w = images.shape[-2:]
+        h, w = h // self.patch_size, w // self.patch_size
+        num_spatial = h * w
+
+        # tokens through the network (timm handles cls/pos embeds in _pos_embed)
+        x = self.vit.patch_embed(images)
+        x = self.vit._pos_embed(x)
+        for i, blk in enumerate(self.vit.blocks):
+            x = blk(x)
+            if i == self.multilayers[0]:
+                break
+
+        spatial = x[:, -num_spatial:]          # patch tokens (robust to register tokens)
+        cls_tok = x[:, 0]                       # CLS token
+        tokens = torch.cat([x[:, :1], spatial], dim=1)   # [B, 1+N, C]
+
+        if self.efficient_probe:
+            return tokens
+        if self.return_cls and not self.mean_pool:
+            return cls_tok
+        if self.mean_pool and not self.return_cls:
+            return tokens[:, 1:].mean(dim=1)
+        if self.mean_pool and self.return_cls:
+            return tokens.mean(dim=1)
+        return tokens_to_output(self.output, spatial, cls_tok, (h, w))
+```
+
+Then add `configs/backbone/mymodel.yaml`:
+
+```yaml
+_target_: sparrta.models.mymodel.MyModel
+model_name: vit_base_patch16_224.augreg2_in21k_ft_in1k
+output: dense
+layer: -1
+return_cls: false
+mean_pool: false
+efficient_probe: false
+```
+
+That's it — you can now run `backbone=mymodel`.
+
+### 3. Loading from Hugging Face `transformers`
+
+If your model ships as a `transformers` checkpoint, load it in `__init__` instead of `timm`
+(see [`sparrta/models/mae.py`](sparrta/models/mae.py)):
+
+```python
+from transformers import AutoModel
+self.vit = AutoModel.from_pretrained(model_name).eval()
+# expose self.feat_dim = self.vit.config.hidden_size, self.patch_size, etc.
+```
+
+The rest of the wrapper (the `forward` shapes and the required attributes) is identical.
+
+### 4. Models that live in their own repo
+
+For a model whose code is **not** pip-installable (the VGGT / SPA / CroCo pattern), gate the
+import behind an environment variable using the `require_external_repo` helper so that the rest
+of SpaRRTa keeps working when the repo is absent
+(see [`sparrta/models/vggt.py`](sparrta/models/vggt.py)):
+
+```python
+from .util import require_external_repo
+
+class MyExternalModel(nn.Module):
+    def __init__(self, repo_dir: str = "", ...):
+        super().__init__()
+        require_external_repo(
+            repo_dir, "MYMODEL_REPO", "MyModel", "https://github.com/you/mymodel"
+        )
+        import sys; sys.path.append(repo_dir)
+        from mymodel import build_model   # import only after the guard
+        ...
+```
+
+and reference the env var from the config:
+
+```yaml
+_target_: sparrta.models.myexternal.MyExternalModel
+repo_dir: ${oc.env:MYMODEL_REPO,""}
+```
+
+Selecting this backbone without `$MYMODEL_REPO` set then raises a clear, actionable error
+instead of an `ImportError` deep in the stack.
+
+### 5. Run it
+
+```bash
+# sanity-check the resolved config first
+python train.py --cfg job backbone=mymodel dataset=unreal_position
+
+# probe it (egocentric task, forest environment)
+python train.py \
+  backbone=mymodel \
+  dataset=unreal_position \
+  probe=classifier probe._target_=sparrta.models.probes.EfficientProbing \
+  dataset.perspective=camera \
+  environment=forest
+```
+
+To include it in a sweep, just add `"mymodel"` to the `models` list in
+[`scripts/run_sweep.py`](scripts/run_sweep.py).
+
 ## Installation
 
 ```bash
