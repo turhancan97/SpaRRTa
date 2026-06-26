@@ -16,6 +16,15 @@ Left / Right) of a target object with respect to a reference object, from a give
 > *SpaRRTa: A Synthetic Benchmark for Evaluating Spatial Intelligence in Visual Foundation Models.*
 > [arXiv:2601.11729](https://arxiv.org/abs/2601.11729)
 
+🔗 **Links:** 🚀 [**Live demo**](https://huggingface.co/spaces/turhancan97/SpaRRTa-demo) ·
+📄 [Paper](https://arxiv.org/abs/2601.11729) ·
+🧩 [Dataset](https://huggingface.co/datasets/turhancan97/SpaRRTa) ·
+🧱 [Lego split](https://huggingface.co/datasets/turhancan97/SpaRRTa-Lego) ·
+🔬 [Attention split](https://huggingface.co/datasets/turhancan97/SpaRRTa-Attention)
+
+> 🚀 **Try it in your browser:** the [**SpaRRTa demo**](https://huggingface.co/spaces/turhancan97/SpaRRTa-demo)
+> lets you upload an image and see what a probed backbone predicts for the spatial relation between objects.
+
 ---
 
 ## The task
