@@ -287,6 +287,7 @@ The datasets are **not** bundled with the code. Download them from Hugging Face:
 
 - 🧩 **Synthetic (Unreal):** https://huggingface.co/datasets/turhancan97/SpaRRTa
 - 🧱 **Real-world (lego):** https://huggingface.co/datasets/turhancan97/SpaRRTa-Lego
+- 🔬 **Attention analysis (images + masks):** https://huggingface.co/datasets/turhancan97/SpaRRTa-Attention — only needed for the [Attention analysis](#attention-analysis) suite (`SPARRTA_ANALYSIS_ROOT`).
 
 The lego set ships in Hugging Face ImageFolder layout, so downloading it reproduces the
 `train/{front,back,left,right}/*.jpg` structure expected below:
@@ -301,6 +302,7 @@ Then point the code at the data via environment variables:
 ```bash
 export SPARRTA_DATA_ROOT=/path/to/sparrta/unreal   # Unreal environments live here
 export SPARRTA_LEGO_ROOT=/path/to/sparrta/lego      # real-world lego images
+export SPARRTA_ANALYSIS_ROOT=/path/to/sparrta/attn  # images + masks for the attention analysis
 export SPARRTA_CACHE_DIR=./cache                    # cached frozen features (created on demand)
 export SPARRTA_MODELS_DIR=~/.cache/sparrta/models   # downloaded backbone weights
 ```
