@@ -408,6 +408,60 @@ The training script supports three `protocol` values:
 - `loto_source_to_target` — train/val on non-holdout environments, test on the holdout one.
 - `target_only` — train/val/test on the holdout environment (used for few-shot adaptation).
 
+## Attention analysis
+
+The suite in `sparrta/analysis/` probes **where** a frozen backbone attends. It captures the
+raw self-attention at every layer and, using per-object segmentation masks, measures how much
+attention flows **between the objects in the scene** (Human / Tree / Truck), the `CLS` token,
+the background, and register tokens — the evidence behind the paper's finding that spatial
+information concentrates in patch tokens.
+
+### Data
+
+This analysis needs the **masks** as well as the images, so it uses a dedicated dataset
+(separate from the main probing data). Download it and point `SPARRTA_ANALYSIS_ROOT` at it:
+
+```bash
+huggingface-cli download turhancan97/SpaRRTa-Attention --repo-type dataset --local-dir ./hf_SpaRRTa-Attention
+export SPARRTA_ANALYSIS_ROOT=$(pwd)/hf_SpaRRTa-Attention
+```
+
+Expected layout (`$SPARRTA_ANALYSIS_ROOT/<environment>/params_XXXX/`):
+
+```
+img_XXXX.jpg
+metadata/
+  mask_Human.png
+  mask_Tree.png
+  mask_Truck.png
+  masks_log.csv
+```
+
+### Pipeline
+
+Configured via `configs/attention.yaml` (`environment`, the `models` to analyse and their
+layers, and the `object_analysis` mask settings). Typical run order:
+
+| Step | Script | Purpose |
+|------|--------|---------|
+| 1 | `sparrta/analysis/visualize_patch_masks.py` | Sanity-check that masks map correctly onto the patch grid. |
+| 2 | `sparrta/analysis/compute_attention.py` | Run the backbones, record per-layer attention, write `*_object_attention.csv` + plots (one run per `environment`). |
+| 3 | `sparrta/analysis/plot_attention.py` | Plot query→target / self-attention curves for **one** environment. |
+| 3' | `sparrta/analysis/aggregate_attention.py` | Aggregate the CSVs **across** environments with mean ± CI bands. |
+| 4 | `sparrta/analysis/attention_rollout.py` | Render attention-rollout heatmap overlays (global and per-object). |
+
+```bash
+# compute attention for one environment (override models on the CLI to pick backbones)
+python sparrta/analysis/compute_attention.py environment=winter_town
+
+# inspect the fully-resolved config without running
+python sparrta/analysis/compute_attention.py --cfg job --resolve
+```
+
+Outputs default to `result/attention/<environment>/`. Backbones that live in an external repo
+(`vggt`, `spa`, `croco`, local `dinov3`) are loaded lazily — set the matching env var
+(e.g. `VGGT_REPO`) or remove that entry from the config's `models` list.
+
 ## Citation
 
 ```bibtex
