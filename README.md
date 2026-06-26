@@ -422,3 +422,12 @@ The training script supports three `protocol` values:
 ## License
 
 Released under the [MIT License](LICENSE).
+
+## Acknowledgements
+
+This codebase builds on the excellent work of:
+
+- [**probe3d**](https://github.com/mbanani/probe3d) — the probing framework that this code is derived from.
+- [**midvision-probe**](https://github.com/UVA-Computer-Vision-Lab/midvision-probe) — the mid-level vision probing extension we built upon.
+
+We thank their authors for releasing their code.
