@@ -378,7 +378,27 @@ python train.py --cfg job backbone=dino_b16 dataset=unreal_position
 | `scripts/summarize_loto_fewshot.py` | Aggregate LOTO/few-shot result CSVs into tables and plots. |
 | `scripts/summarize_lego_rebuttal.py` | Aggregate real-world (lego) result CSVs. |
 | `scripts/count_position_probe_params.py` | Report trainable parameter counts per probe head. |
-| `scripts/slurm/*.sh` | SLURM batch wrappers (edit the conda activation lines for your cluster). |
+| `scripts/slurm/*.sh` | SLURM batch wrappers (see *Running on SLURM* below). |
+
+### Running on SLURM
+
+The wrappers in `scripts/slurm/` are intentionally generic — they ship with
+placeholders, not a specific cluster's settings. Before submitting, edit each script:
+
+1. **`#SBATCH` directives** — set `-p <your_partition>` and `--qos <your_qos>` to the names
+   your site uses (`sinfo` lists them) and tune `--gpus` / `--cpus-per-task` / `--mem` /
+   `--time` to your resources.
+2. **Conda** — point `source .../conda.sh` at your install (or export `CONDA_PREFIX_PATH`) and
+   set the env name via `CONDA_ENV` (defaults to `sparrta`).
+3. **Data paths** — the scripts default to a local `./data`. Either export the `SPARRTA_*`
+   variables in your shell / via `sbatch --export`, or edit the defaults at the top of the
+   script. See [Data](#data) for the variables and expected layout.
+
+```bash
+# example: keep the script generic and pass your paths/env at submit time
+SPARRTA_DATA_ROOT=/abs/path/to/sparrta CONDA_ENV=myenv \
+  sbatch --export=ALL scripts/slurm/zrun_train_position.sh
+```
 
 ### Transfer protocols
 

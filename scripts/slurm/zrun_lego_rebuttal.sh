@@ -1,7 +1,11 @@
 #!/bin/bash
-#SBATCH -p rtx4090_batch
+# ----------------------------------------------------------------------------
+# SLURM directives -- EDIT FOR YOUR CLUSTER. Set the partition/QOS to the names
+# your site uses (run `sinfo` to list them); tune the resource requests below.
+# ----------------------------------------------------------------------------
+#SBATCH -p <your_partition>
+#SBATCH --qos <your_qos>
 #SBATCH --gpus=1
-#SBATCH --qos=batch
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=64G
 #SBATCH --ntasks=1
@@ -30,10 +34,11 @@ DRY_RUN=false           # true/false
 #=============================================================================
 # SETUP
 #=============================================================================
-# Point the code at the data. Override these (or export them in your shell /
-# sbatch --export) to match where you keep the SpaRRTa data and caches.
-export SPARRTA_DATA_ROOT="${SPARRTA_DATA_ROOT:-/shared/results/common/kargin/unreal_engine/dataset/position_between_objects}"
-export SPARRTA_LEGO_ROOT="${SPARRTA_LEGO_ROOT:-/shared/results/common/kargin/unreal_engine/dataset/position_between_objects/real_world_images}"
+# Point the code at the data. Set these to where you downloaded the SpaRRTa
+# datasets (see the README "Data" section). Override them by exporting in your
+# shell or via `sbatch --export`; the defaults below assume a local ./data dir.
+export SPARRTA_DATA_ROOT="${SPARRTA_DATA_ROOT:-./data}"
+export SPARRTA_LEGO_ROOT="${SPARRTA_LEGO_ROOT:-./data/lego_images}"
 export SPARRTA_CACHE_DIR="${SPARRTA_CACHE_DIR:-./cache}"
 export HYDRA_FULL_ERROR=1
 
