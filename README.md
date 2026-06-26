@@ -50,6 +50,10 @@ Three heads are provided (`sparrta/models/probes.py`):
 A central finding of the paper: spatial information lives in the **patch tokens**, so attention
 probes (`EfficientProbing` > `ABMILPHead`) substantially outperform a linear probe on pooled features.
 
+> To inspect a trained probe on a single image (prediction vs. ground truth + attention overlay),
+> see [`notebook/position_probe_inspection.ipynb`](notebook/README.md) — it ships with example
+> images and a trained head so it runs out of the box (with `$VGGT_REPO` set).
+
 ## Backbones
 
 All 15 backbones from the paper are supported via Hydra configs in `configs/backbone/`:

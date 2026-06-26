@@ -1,0 +1,77 @@
+{
+  "camera": {
+    "label": "RenderCamera",
+    "path": "/Game/WinterTown/Maps/RussianWinterTownDemo01.RussianWinterTownDemo01:PersistentLevel.CineCameraActor_4",
+    "location": {
+      "x": -1146.0020928696672,
+      "y": -4931.776808778327,
+      "z": 633.5149586736845
+    },
+    "rotation": {
+      "pitch": -27.97059210661309,
+      "yaw": 1.5889321760861752,
+      "roll": 5.772889162570886e-09
+    },
+    "intrinsics": {
+      "sensor_width_mm": 50.0,
+      "sensor_height_mm": 50.0,
+      "focal_length_mm": 50.0,
+      "aperture_f": 10.0,
+      "hfov_deg": 53.13010235415598,
+      "vfov_deg": 53.13010235415598,
+      "focus": {
+        "method": "DISABLE: 3>",
+        "manual_distance": 100000.0
+      }
+    }
+  },
+  "actors": {
+    "StaticMeshActor_9": {
+      "label": "Human",
+      "location": {
+        "x": -348.99129421569535,
+        "y": -4778.610655991058,
+        "z": 100.99381113052368
+      },
+      "rotation": {
+        "pitch": 0.0,
+        "yaw": 143.88232421875,
+        "roll": 0.0
+      }
+    },
+    "StaticMeshActor_11": {
+      "label": "Snowman",
+      "location": {
+        "x": -267.74994721506334,
+        "y": -5188.724499253145,
+        "z": 104.99921374481858
+      },
+      "rotation": {
+        "pitch": 0.0,
+        "yaw": 101.49324798583989,
+        "roll": 0.0
+      }
+    },
+    "StaticMeshActor_10": {
+      "label": "Husky",
+      "location": {
+        "x": 161.85812395113408,
+        "y": -4745.245792602735,
+        "z": 104.75122833251953
+      },
+      "rotation": {
+        "pitch": 0.0,
+        "yaw": -108.28857421875001,
+        "roll": 0.0
+      }
+    }
+  },
+  "source": {
+    "original_params": "params_0015.json",
+    "label_mapping": {
+      "Human": "Human",
+      "Tree": "Snowman",
+      "Truck": "Husky"
+    }
+  }
+}

@@ -28,6 +28,9 @@ data/
 *.pt
 *.ckpt
 
+# Keep the small bundled example probe head used by the inspection notebook
+!notebook/heads/*.pt
+
 # OS / editor
 .DS_Store
 .idea/
